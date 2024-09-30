@@ -4,8 +4,6 @@ Extrage Cărțile Funciare și Extrasele de Plan Cadastral din fișierele PrintJ
 ---
 > Omite încheierile în cazul in care au fost lăsate din greșeală
 
-Programul a fost scris cu Python 3.6 și modulul PyPDF2
-
 # Utilizare:
 
 Copiază programul în folder-ul cu PrintJob-urile și ruleazăl.
