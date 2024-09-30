@@ -8,6 +8,7 @@ Programul a fost scris cu Python 3.6 și modulul PyPDF2
 # Utilizare:
 
 Copiază programul în folder-ul cu PrintJob-urile și ruleazăl.
+
 Acesta va :
 - cauta toate fisierele pdf;
 - crea foldare pentru extrasul de cf si de plan cadastral;
