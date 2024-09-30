@@ -1,0 +1,89 @@
+from PyPDF2 import PdfReader, PdfWriter
+import os
+import re
+
+
+def extract_varIE(text):
+    """
+    Extrage IE cautand "imobil nr. cadastral {varIE} / UAT"
+    or "Carte Funciară Nr. {varIE}".
+    """
+    match = re.search(r'nr\. cadastral (\d+)', text)
+    if not match:
+        match = re.search(r'Carte Funciară Nr\. (\d+)', text)
+
+    if match:
+        return match.group(1)
+    else:
+        return "unknown"  # Returneaza o valuare implicita de eroare
+
+
+# Creaza foldare daca nu exista
+folders = ['ExtrasPlan', 'ExtrasCF']
+for folder in folders:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+# Creaza o lista cu toate fisiere din lista
+pdf_files = [f for f in os.listdir('.') if f.endswith('.PDF')]
+
+# Proceseaza fiecare fisier
+for pdf_file in pdf_files:
+    pdf_path = os.path.join(os.getcwd(), pdf_file)
+    print(f"Processing: {pdf_path}")
+
+    with open(pdf_path, 'rb') as pdf_file_handle:
+        pdf_reader = PdfReader(pdf_file_handle)
+        total_pages = len(pdf_reader.pages)
+        currentPage = 0
+
+        while currentPage < total_pages:
+            page = pdf_reader.pages[currentPage]
+            page_text = page.extract_text()
+
+            # Cauta "Extras de Plan Cadastral de Carte Funciară" in text
+            if f"Extras de Plan Cadastral de Carte Funciară, imobil nr. cadastral" in page_text:
+                varIE = extract_varIE(page_text)
+                output_folder = 'ExtrasPlan'
+                pdf_writer = PdfWriter()
+
+                while currentPage < total_pages:
+                    page_text = pdf_reader.pages[currentPage].extract_text()
+                    if f"Carte Funciară Nr." in page_text:
+                        break  # Stop cand incepe ExtrasCF
+                    elif f"INCHEIERE Nr." in page_text:
+                        break # Stop cand incepe INCHEIEREA
+                    pdf_writer.add_page(pdf_reader.pages[currentPage])
+                    currentPage += 1
+
+                # Salveaza PDFul
+                output_filename = f"{varIE}.pdf"
+                output_path = os.path.join(output_folder, output_filename)
+                with open(output_path, 'wb') as output_file:
+                    pdf_writer.write(output_file)
+
+            # Cauta "Carte Funciară Nr." in text
+            elif f"Carte Funciară Nr." in page_text:
+                varIE = extract_varIE(page_text)
+                output_folder = 'ExtrasCF'
+                pdf_writer = PdfWriter()
+
+                while currentPage < total_pages:
+                    page_text = pdf_reader.pages[currentPage].extract_text()
+                    if f"Extras de Plan Cadastral de Carte Funciară, imobil nr. cadastral" in page_text:
+                        break   # Stop cand incepe Extrasul de Plan Cadastral
+                    elif f"INCHEIERE Nr." in page_text:
+                        break  # Stop cand incepe INCHEIEREA
+                    pdf_writer.add_page(pdf_reader.pages[currentPage])
+                    currentPage += 1
+
+                # Salveaza PDFul
+                output_filename = f"{varIE}.pdf"
+                output_path = os.path.join(output_folder, output_filename)
+                with open(output_path, 'wb') as output_file:
+                    pdf_writer.write(output_file)
+
+            else:
+                currentPage += 1  # Treci la urmatoarea pagina
+
+print("Proces complet.")
