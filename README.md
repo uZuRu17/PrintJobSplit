@@ -5,7 +5,8 @@ Extrage Cărțile Funciare și Extrasele de Plan Cadastral din fișierele PrintJ
 
 Programul a fost scris cu Python 3.6 și modulul PyPDF2
 
-Utilizare:
+# Utilizare:
+
 Copiază programul în folder-ul cu PrintJob-urile și ruleazăl.
 Acesta va :
 - cauta toate fisierele pdf;
